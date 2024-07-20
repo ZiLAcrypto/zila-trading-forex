@@ -5,17 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Zila Forex Game</title>
     <style>
-        /* General body styles */
         body {
             font-family: Arial, sans-serif;
-            background-color: #121212;
+            background-color: #000;
             color: #fff;
             text-align: center;
             padding: 20px;
-            margin: 0;
         }
-        
-        /* Loading screen styles */
         .loading-screen {
             position: fixed;
             top: 0;
@@ -31,8 +27,6 @@
             flex-direction: column;
             z-index: 1000;
         }
-        
-        /* Play button styles */
         .play-button {
             background-color: #28a745;
             color: #fff;
@@ -43,8 +37,6 @@
             border-radius: 5px;
             margin-top: 20px;
         }
-        
-        /* Main interface styles */
         .main-interface {
             display: none;
             background-image: url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRWRR9KMxIY72OYR1TxvxEfLL2zlX8Q5o0TLg&usqp=CAU');
@@ -52,16 +44,12 @@
             background-position: center;
             padding: 20px;
         }
-        
-        /* Chart container styles */
         .chart-container {
             position: relative;
             width: 80%;
             height: 400px;
             margin: 20px auto;
         }
-        
-        /* Button styles */
         .button {
             color: #fff;
             padding: 10px 20px;
@@ -70,16 +58,12 @@
             font-size: 16px;
             margin: 10px;
         }
-        
         .up-button {
             background-color: #28a745;
         }
-        
         .down-button {
             background-color: #dc3545;
         }
-        
-        /* Input field styles */
         .input-field {
             padding: 10px;
             margin: 10px;
@@ -89,36 +73,21 @@
             border: none;
             border-radius: 5px;
         }
-        
-        /* Live price styles */
-        .live-price {
-            font-size: 24px;
-            margin: 20px 0;
-        }
-        
-        /* Balance styles */
-        .balance {
-            font-size: 18px;
-            margin: 20px 0;
-        }
-        
-        /* Prediction info styles */
-        .prediction-info {
-            font-size: 18px;
-            margin: 20px 0;
-        }
-        
-        /* Date and time styles */
         #date-time {
             margin-top: 20px;
             font-size: 20px;
         }
-        
-        /* Profitability index styles */
-        .profitability-index {
+        .balance {
+            font-size: 18px;
+            margin: 20px 0;
+        }
+        .prediction-info {
+            font-size: 18px;
+            margin: 20px 0;
+        }
+        .live-price {
             font-size: 24px;
             margin: 20px 0;
-            color: #ffd700;
         }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -134,13 +103,10 @@
             <canvas id="priceChart"></canvas>
         </div>
         <div class="live-price">
-            Live ZiLA Price: <span id="livePrice">50.00</span>
+            Live ZiLA Price: <span id="livePrice">50</span>
         </div>
         <div class="balance">
-            <p>Zila Balance: <span id="zilaBalance">1000.00</span> ZiLA</p>
-        </div>
-        <div class="profitability-index">
-            Profitability Index: <span>1.80</span>
+            <p>Zila Balance: <span id="zilaBalance">0</span> ZiLA</p>
         </div>
         <div>
             <label for="timeChoice">Choose Time:</label>
@@ -158,27 +124,23 @@
         <div class="prediction-info">
             <p>Strike Price: <span id="strikePrice">N/A</span></p>
             <p>Countdown: <span id="countdown">N/A</span></p>
-            <p>Price Range (Last 2 min): <span id="priceRange">N/A</span></p>
         </div>
         <div id="date-time"></div>
     </div>
     <script>
         const profitabilityIndex = 1.80;
-        let zilaBalance = parseFloat(localStorage.getItem('zilaBalance')) || 1000;
+        let zilaBalance = parseFloat(localStorage.getItem('zilaBalance')) || 0; // Correct initial balance
         let priceData = Array(60).fill(50).map((_, i) => 50 + Math.sin(i / 3) * 5); // Initial wavy data
         let chart;
         let currentTimeChoice = 1;
         let countdownInterval;
 
-        document.getElementById('zilaBalance').innerText = zilaBalance.toFixed(2);
-
-        // Function to start the game and show the main interface
         function startGame() {
             document.getElementById('loadingScreen').style.display = 'none';
             document.getElementById('mainInterface').style.display = 'block';
+            document.getElementById('zilaBalance').innerText = zilaBalance.toFixed(2); // Update the Zila balance display
         }
 
-        // Function to update the date and time
         function updateDateTime() {
             const now = new Date();
             document.getElementById('date-time').innerText = `Current Date and Time: ${now.toLocaleDateString()} ${now.toLocaleTimeString()}`;
@@ -186,22 +148,18 @@
         setInterval(updateDateTime, 1000);
         updateDateTime();
 
-        // Function to generate a random price change
         function getRandomPriceChange() {
             return (Math.random() - 0.5) * 8; // Increased range for more pronounced zig-zag
         }
 
-        // Function to update the chart with new data
         function updateChart() {
             const newPrice = priceData[priceData.length - 1] + getRandomPriceChange();
             priceData.push(newPrice);
             if (priceData.length > 60) priceData.shift();
             document.getElementById('livePrice').innerText = newPrice.toFixed(2); // Update live price display
             chart.update();
-            updatePriceRange();
         }
 
-        // Function to create the chart using Chart.js
         function createChart() {
             const ctx = document.getElementById('priceChart').getContext('2d');
             chart = new Chart(ctx, {
@@ -230,7 +188,6 @@
             });
         }
 
-        // Function to start the countdown timer
         function startCountdown(duration) {
             clearInterval(countdownInterval);
             let timeLeft = duration / 1000;
@@ -245,7 +202,6 @@
             }, 1000);
         }
 
-        // Function to handle the prediction logic
         function predict(direction) {
             const stake = parseFloat(document.getElementById('stake').value);
             if (stake <= 0 || stake > zilaBalance) {
@@ -278,14 +234,6 @@
                 document.getElementById('zilaBalance').innerText = zilaBalance.toFixed(2);
                 localStorage.setItem('zilaBalance', zilaBalance);
             }, duration);
-        }
-
-        // Function to update the price range for the last 2 minutes
-        function updatePriceRange() {
-            const last2MinPrices = priceData.slice(-120);
-            const minPrice = Math.min(...last2MinPrices).toFixed(2);
-            const maxPrice = Math.max(...last2MinPrices).toFixed(2);
-            document.getElementById('priceRange').innerText = `${minPrice} - ${maxPrice}`;
         }
 
         document.getElementById('timeChoice').addEventListener('change', function() {
